@@ -68,7 +68,7 @@ while ($true) {
 						</script>
 					  </head>
 					  <body>
-					  <script>self.close();
+					  <script>self.close();</script>
 					  </body>
 					</html>'
 		

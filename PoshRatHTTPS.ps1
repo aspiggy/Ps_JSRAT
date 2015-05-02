@@ -9,7 +9,7 @@
   
 #>
 
-$Server = '73.181.78.130' #Listening IP. Change This.
+$Server = '127.0.0.1' #Listening IP. Change This.
 
 function Invoke-CreateCertificate([string] $certSubject, [bool] $isCA)
 {

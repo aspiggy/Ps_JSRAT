@@ -11,7 +11,7 @@
 
 $Server = '127.0.0.1' #Listening IP. Change This.
 
-#JEWEBDAV Just Enough WebDAV to allow you to map drive to get a binary back to host:)
+#JE-WEBDAV Just Enough WebDAV to allow you to map drive to get a binary back to host:)
 [byte[]] $File = [System.IO.File]::ReadAllBytes('C:\Tools\mimikatz.exe')
 
 $webDAVPROPFINDResponse = '<?xml version="1.0" encoding="utf-8"?><D:multistatus xmlns:D="DAV:"><D:response><D:href>http://'+ $Server +'/</D:href><D:propstat><D:status>HTTP/1.1 200 OK</D:status><D:prop><D:getcontenttype/><D:getlastmodified>Thu, 07 Aug 2014 16:33:21 GMT</D:getlastmodified><D:lockdiscovery/><D:ishidden>0</D:ishidden><D:supportedlock><D:lockentry><D:lockscope><D:exclusive/></D:lockscope><D:locktype><D:write/></D:locktype></D:lockentry><D:lockentry><D:lockscope><D:shared/></D:lockscope><D:locktype><D:write/></D:locktype></D:lockentry></D:supportedlock><D:getetag/><D:displayname>/</D:displayname><D:getcontentlanguage/><D:getcontentlength>0</D:getcontentlength><D:iscollection>1</D:iscollection><D:creationdate>2014-05-27T19:01:44.48Z</D:creationdate><D:resourcetype><D:collection/></D:resourcetype></D:prop></D:propstat></D:response></D:multistatus>'

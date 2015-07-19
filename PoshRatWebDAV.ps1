@@ -11,7 +11,7 @@
   
 #>
 
-$Server = '127.0.0.1' Listening IP. Change This.
+$Server = '127.0.0.1' #Listening IP. Change This.
 $webDAVFolder = 'c:\Xfer'
 <#
 $net = new-object -ComObject WScript.Network

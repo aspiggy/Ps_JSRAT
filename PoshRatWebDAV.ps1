@@ -145,9 +145,10 @@ while ($true) {
 	if (($request.HttpMethod -eq "LOCK") -or ($request.HttpMethod -eq "UNLOCK")) { 
         $message = $webDAVLOCKResponse
     }
-	if ($request.Url -match '/drive/file.bin$' -and ($request.HttpMethod -eq "PUT")) {
+	if ($request.HttpMethod -eq "PUT") {
 		$ms = New-Object System.IO.MemoryStream
-		[byte[]] $buffer = New-Object byte[] 16384
+		
+		[byte[]] $buffer = New-Object byte[] 65536
 		[int] $bytesRead | Out-Null
 		$Stream = $request.InputStream
 		do
@@ -157,12 +158,15 @@ while ($true) {
 			
 		} while ( $bytesRead -ne 0)
 
+		$Uri = $request.Url 
+		$ReceivedFileName = $Uri.Segments[-1]
+		Write-Host "Receiving File: " $ReceivedFileName -Fore Cyan
 		[byte[]] $Content = $ms.ToArray()
-		Set-Content -Path "$webDAVFolder\file.bin" -Value $Content -Encoding Byte | Out-Null
+		Set-Content -Path "$webDAVFolder\$ReceivedFileName" -Value $Content -Encoding Byte | Out-Null
 		$response.Close()
 		continue
 	}
-	if ($request.Url -match '/drive/file.bin$' -and ($request.HttpMethod -eq "PROPFIND") ){  
+	if ($request.Url -match '/drive/$' -and ($request.HttpMethod -eq "PROPFIND") ){  
 		$message = $webDAVXFERResponse
 	}
 	if ($request.Url -match '/drive/file.bin$' -and ($request.HttpMethod -eq "GET") ){ 
@@ -176,6 +180,7 @@ while ($true) {
 		
 	}
 	
+	
     [byte[]] $buffer = [System.Text.Encoding]::UTF8.GetBytes($message)
     $response.ContentLength64 = $buffer.length
     $output = $response.OutputStream
@@ -184,4 +189,3 @@ while ($true) {
 }
 
 $listener.Stop()
-

